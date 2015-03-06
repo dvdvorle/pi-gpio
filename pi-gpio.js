@@ -137,8 +137,16 @@ var gpio = {
 	setDirection: function(pinNumber, direction, callback) {
 		pinNumber = sanitizePinNumber(pinNumber);
 		direction = sanitizeDirection(direction);
+		callback = callback || noop;
 
-		fs.writeFile(sysFsPath + "/gpio" + pinMapping[pinNumber] + "/direction", direction, (callback || noop));
+        gpio.getDirection(pinNumber, function(err, currentDirection) {
+            if (err) return callback(err);
+            if(currentDirection !== direction) {
+                fs.writeFile(sysFsPath + "/gpio" + pinMapping[pinNumber] + "/direction", direction, callback);
+            } else {
+                callback();
+            }
+        });
 	},
 
 	getDirection: function(pinNumber, callback) {
